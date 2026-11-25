@@ -80,7 +80,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   handleDirection(direction) {
-    if (this.isGameOver) {
+    if (this.isGameOver || this.scene.isPaused()) {
       return;
     }
 

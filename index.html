@@ -2,11 +2,17 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>탑 정복자</title>
   <style>
     * {
       box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100dvh;
+      overflow: hidden;
     }
 
     body {
@@ -15,7 +21,7 @@
       display: flex;
       justify-content: center;
       margin: 0;
-      min-height: 100vh;
+      overscroll-behavior: none;
     }
 
     #game-canvas {
@@ -23,20 +29,80 @@
       background: #101820;
       display: block;
       height: auto;
-      max-height: 100vh;
+      max-height: 100dvh;
       max-width: 100%;
       width: auto;
     }
   </style>
+  <script type="module">
+    import { createSDK } from "https://h5sdk.onestore.net/lib/v1.2.0/onestore-h5-sdk.min.js";
+
+    window.__onestoreSdkBootStarted = true;
+
+    function whenGame(fn) {
+      if (window.TowerConqueror) {
+        fn(window.TowerConqueror);
+      } else {
+        document.addEventListener("DOMContentLoaded", () => fn(window.TowerConqueror), { once: true });
+      }
+    }
+
+    function saveProgress() {
+      // 동기 저장 훅 (0.5초 이내). 현재 명세에는 영구 저장 대상이 없습니다.
+    }
+
+    function bootWithSdk() {
+      const sdk = createSDK();
+
+      sdk.on("pause", () => {
+        whenGame((game) => game.pause());
+      });
+
+      sdk.on("resume", (event = {}) => {
+        whenGame((game) => game.resume({ ringerSilent: event.ringerSilent }));
+      });
+
+      sdk.on("exit", () => {
+        saveProgress();
+      });
+
+      sdk.onBackPressed(() => false);
+
+      sdk.initializeAsync()
+        .then((info) => {
+          if (info.err) {
+            whenGame((game) => game.start());
+            return;
+          }
+
+          sdk.setLoadingProgress(0);
+
+          whenGame((game) => {
+            sdk.setLoadingProgress(100);
+            sdk.startGameAsync()
+              .then(() => {
+                game.start({ ringerSilent: info.ringerSilent });
+              })
+              .catch(() => {
+                game.start({ ringerSilent: info.ringerSilent });
+              });
+          });
+        })
+        .catch(() => {
+          whenGame((game) => game.start());
+        });
+    }
+
+    bootWithSdk();
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+  <script defer src="js/ui.js"></script>
+  <script defer src="js/scenes/StartScene.js"></script>
+  <script defer src="js/scenes/PlayScene.js"></script>
+  <script defer src="js/scenes/ResultScene.js"></script>
+  <script defer src="js/main.js"></script>
 </head>
 <body>
   <canvas id="game-canvas" width="960" height="540" aria-label="게임 화면"></canvas>
-
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/scenes/StartScene.js"></script>
-  <script src="js/scenes/PlayScene.js"></script>
-  <script src="js/scenes/ResultScene.js"></script>
-  <script src="js/main.js"></script>
 </body>
 </html>
