@@ -11,7 +11,7 @@
 
     body {
       align-items: center;
-      background: #111827;
+      background: #101820;
       display: flex;
       justify-content: center;
       margin: 0;
@@ -19,10 +19,13 @@
     }
 
     #game-canvas {
-      background: #1f2937;
+      aspect-ratio: 960 / 540;
+      background: #101820;
       display: block;
       height: auto;
+      max-height: 100vh;
       max-width: 100%;
+      width: auto;
     }
   </style>
 </head>
@@ -30,5 +33,10 @@
   <canvas id="game-canvas" width="960" height="540" aria-label="게임 화면"></canvas>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/scenes/StartScene.js"></script>
+  <script src="js/scenes/PlayScene.js"></script>
+  <script src="js/scenes/ResultScene.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
